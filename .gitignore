@@ -1,0 +1,37 @@
+# -------------------------
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual env
+.venv/
+venv/
+
+# -------------------------
+# Node / React
+node_modules/
+dist/
+build/
+.cache/
+*.log
+
+# -------------------------
+# App uploads (don’t push user-generated files)
+uploads/
+media/
+tmp/
+
+# -------------------------
+# Environment & Secrets
+.env
+.env.*
+
+# -------------------------
+# macOS / IDE
+.DS_Store
+.vscode/
+.idea/

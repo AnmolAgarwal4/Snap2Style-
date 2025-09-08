@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+requests
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+SQLAlchemy>=1.4
+filelock
+google-auth
+python-multipart
+email-validator

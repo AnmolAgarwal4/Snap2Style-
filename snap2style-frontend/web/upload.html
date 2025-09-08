@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Upload — Snap2Style</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="upload-page">
+  <!-- Top bar -->
+  <header class="nav glass">
+    <div class="brand"><a class="mark" href="snap.html">← Snap2Style</a></div>
+    <nav>
+      <a href="rate.html" style="margin-right:12px">Rate Us</a>
+      <button id="acctBtn" class="acct-btn" title="Account"><span id="acctInitial">?</span></button>
+    </nav>
+  </header>
+
+  <main class="panel">
+    <div class="card glass">
+      <h2>Upload & Choose Style</h2>
+      <p class="muted">Drag an image or click the box. Mock mode works for free.</p>
+
+      <!-- Controls -->
+      <div class="controls">
+        <label class="select-wrap">
+          <span>Style</span>
+          <select id="styleSelect">
+            <option value="">Custom (use text)</option>
+            <option value="minimal">Minimal</option>
+            <option value="cozy">Cozy</option>
+            <option value="industrial">Industrial</option>
+            <option value="luxury">Luxury</option>
+          </select>
+        </label>
+
+        <label class="select-wrap" style="flex:1;">
+          <span>Your instructions</span>
+          <textarea id="instructions" rows="3" placeholder="e.g. Light blue walls, dim ceiling lights, pale wood floors, airy curtains, keep same layout."></textarea>
+        </label>
+
+        <button id="submitBtn" class="btn-primary" type="button">Style My Room</button>
+      </div>
+
+      <!-- Dropzone -->
+      <div id="dropzone" class="dropzone">
+        <input id="fileOverlay" type="file" accept="image/*" class="file-overlay" />
+        <div class="drop-content">
+          <div class="drop-icon">⬆</div>
+          <div><strong>Drag & drop</strong> your image here<br><span class="muted">or click to select</span></div>
+        </div>
+        <img id="preview" class="preview" alt="preview" />
+      </div>
+
+      <div id="status" class="status muted"></div>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="card glass" style="margin-top:18px;">
+      <h2>Before / After</h2>
+      <div class="compare">
+        <img id="imgBefore" class="cmp-img" alt="original"/>
+        <div class="after-wrap"><img id="imgAfter" class="cmp-img" alt="styled"/></div>
+        <input id="slider" class="slider" type="range" min="0" max="100" value="50" />
+      </div>
+      <div class="result-actions">
+        <a id="openFull" class="btn-secondary" href="#" target="_blank" rel="noopener">Open Full Image</a>
+        <a id="downloadBtn" class="btn-secondary hidden">Download</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading overlay -->
+  <div id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <div class="loading-text">Applying style…</div>
+  </div>
+
+  <footer class="footer">© 2025 Snap2Style — Crafted with ❤️</footer>
+
+  <!-- Account dropdown -->
+  <div id="acctOverlay" class="acct-backdrop" aria-hidden="true">
+    <div class="acct-menu" role="menu" aria-label="Account menu">
+      <div class="acct-head">
+        <div class="acct-avatar" id="acctAvatar">?</div>
+        <div class="acct-title">
+          <div class="acct-email" id="acctEmail">Guest</div>
+          <div class="acct-plan" id="acctPlan">Not signed in</div>
+        </div>
+      </div>
+      <div class="acct-sep"></div>
+      <div class="acct-list" id="authedItems" style="display:none">
+        <a class="acct-item" href="plans.html">Upgrade plan</a>
+        <button class="acct-item acct-danger" id="logoutItem" type="button">Log out</button>
+      </div>
+      <div class="acct-list" id="guestItems" style="display:none">
+        <a class="acct-item" href="login.html">Log in</a>
+        <a class="acct-item" href="register.html">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load scripts once -->
+  <script src="/web/js/app.js?v=2" defer></script>
+<script src="/web/js/auth-gate.js?v=1" defer></script>
+
+</body>
+</html>

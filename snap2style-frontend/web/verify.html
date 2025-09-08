@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verify — Snap2Style</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .page { min-height: 100svh; display:flex; flex-direction:column; }
+    .center { flex:1; display:grid; place-items:center; padding:32px 16px; }
+    .auth-card { width:min(520px, 92vw); border-radius:22px; border:1px solid var(--stroke);
+      background: var(--card); backdrop-filter: var(--glass); padding:24px; box-shadow: 0 18px 60px #0007, inset 0 1px 0 #ffffff14; }
+    .auth-title { margin:0 0 14px; font-size:28px; }
+    .field { display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+    .row { display:flex; gap:10px; align-items:center }
+    .btn-wide { width:100%; }
+    .msg { min-height:22px; margin-top:8px; color:#cfd2dc; }
+    .muted { color:var(--muted); font-size:14px; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <div class="bg-layer bg-stars"></div>
+  <div class="bg-layer bg-gradient"></div>
+  <div class="bg-glow"></div>
+
+  <nav class="nav glass">
+    <div class="brand">
+      <a href="snap.html" class="mark">Snap2Style</a>
+    </div>
+    <nav>
+      <a href="login.html" style="margin-right:12px">Login</a>
+      <button id="acctBtn" class="acct-btn" title="Account"><span id="acctInitial">?</span></button>
+    </nav>
+  </nav>
+
+  <!-- account dropdown -->
+  <div id="acctOverlay" class="acct-backdrop" aria-hidden="true">
+    <div class="acct-menu" role="menu" aria-label="Account menu">
+      <div class="acct-head">
+        <div class="acct-avatar" id="acctAvatar">?</div>
+        <div class="acct-title">
+          <div class="acct-email" id="acctEmail">Guest</div>
+          <div class="acct-plan" id="acctPlan">Not signed in</div>
+        </div>
+      </div>
+      <div class="acct-sep"></div>
+      <div class="acct-list" id="authedItems" style="display:none">
+        <a class="acct-item" href="plans.html">Upgrade plan</a>
+        <button class="acct-item acct-danger" id="logoutItem" type="button">Log out</button>
+      </div>
+      <div class="acct-list" id="guestItems" style="display:none">
+        <a class="acct-item" href="login.html">Log in</a>
+        <a class="acct-item" href="register.html">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <section class="center">
+      <form id="vForm" class="auth-card" autocomplete="off">
+        <h2 class="auth-title">Verify your email</h2>
+
+        <div class="field">
+          <label>Email</label>
+          <input id="email" type="email" required />
+        </div>
+
+        <div class="field">
+          <label>6-digit code</label>
+          <div class="row">
+            <input id="code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="123456" required />
+            <button class="btn-ghost" id="resend" type="button">Resend</button>
+          </div>
+        </div>
+
+        <button class="btn-primary btn-wide" type="submit">Verify</button>
+        <div class="msg" id="msg"></div>
+        <div class="muted">Didn’t get it? Check spam, or click Resend.</div>
+      </form>
+    </section>
+  </main>
+
+<script>
+  const API = location.origin.includes(':8000') ? location.origin : 'http://127.0.0.1:8000';
+  const form = document.getElementById('vForm');
+  const msg  = document.getElementById('msg');
+  const emailEl = document.getElementById('email');
+  const codeEl  = document.getElementById('code');
+  const resendBtn = document.getElementById('resend');
+
+  (function(){ const p=new URLSearchParams(location.search); const e=p.get('email'); if(e) emailEl.value=e; })();
+
+  resendBtn.addEventListener('click', async ()=>{
+    msg.textContent = 'Sending a new code…';
+    try {
+      const res = await fetch(API + '/auth/resend-otp', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: emailEl.value })
+      });
+      if (!res.ok) throw new Error('Could not resend code.');
+      msg.textContent = 'Sent! Check your inbox.';
+    } catch (e) { msg.textContent = e.message || 'Resend failed.'; }
+  });
+
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    msg.textContent = 'Verifying…';
+    try {
+      const res = await fetch(API + '/auth/verify-otp', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email: emailEl.value, code: codeEl.value })
+      });
+      const text = await res.text(); let data; try{ data=JSON.parse(text) }catch{}
+      if (!res.ok) throw new Error((data && (data.error||data.detail)) || ('HTTP '+res.status));
+      msg.textContent = 'Verified! Redirecting to login…';
+      setTimeout(()=>{ location.href = 'login.html?just_verified=1'; }, 700);
+    } catch (err) { msg.textContent = err.message || 'Verification failed.'; }
+  });
+</script>
+
+<script src="/web/js/app.js?v=2" defer></script>
+<script src="/web/js/auth-gate.js?v=1" defer></script>
+
+</body>
+</html>

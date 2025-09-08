@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register — Snap2Style</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .page { min-height: 100svh; display:flex; flex-direction:column; }
+    .center { flex:1; display:grid; place-items:center; padding:32px 16px; }
+    .auth-card {
+      width:min(520px, 92vw);
+      border-radius:22px;
+      border:1px solid var(--stroke);
+      background: var(--card);
+      backdrop-filter: var(--glass);
+      padding:24px;
+      box-shadow: 0 18px 60px #0007, inset 0 1px 0 #ffffff14;
+    }
+    .auth-title { margin:0 0 14px; font-size:28px; }
+    .field { display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+    .btn-wide { width:100%; }
+    .muted { color:var(--muted); font-size:14px; margin-top:10px; }
+    .msg { min-height:22px; margin-top:8px; color:#cfd2dc; }
+    .hint { color:var(--muted); font-size:14px; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <!-- bg -->
+  <div class="bg-layer bg-stars"></div>
+  <div class="bg-layer bg-gradient"></div>
+  <div class="bg-glow"></div>
+
+  <!-- nav -->
+  <header class="nav glass">
+    <div class="brand">
+      <a href="snap.html" class="mark">Snap2Style</a>
+    </div>
+    <nav>
+      <a href="login.html" class="btn-secondary" style="margin-right:12px;">Login</a>
+      <button id="acctBtn" class="acct-btn" title="Account"><span id="acctInitial">?</span></button>
+    </nav>
+  </header>
+
+  <!-- account dropdown -->
+  <div id="acctOverlay" class="acct-backdrop" aria-hidden="true">
+    <div class="acct-menu" role="menu" aria-label="Account menu">
+      <div class="acct-head">
+        <div class="acct-avatar" id="acctAvatar">?</div>
+        <div class="acct-title">
+          <div class="acct-email" id="acctEmail">Guest</div>
+          <div class="acct-plan" id="acctPlan">Not signed in</div>
+        </div>
+      </div>
+      <div class="acct-sep"></div>
+      <div class="acct-list" id="authedItems" style="display:none">
+        <a class="acct-item" href="plans.html">Upgrade plan</a>
+        <button class="acct-item acct-danger" id="logoutItem" type="button">Log out</button>
+      </div>
+      <div class="acct-list" id="guestItems" style="display:none">
+        <a class="acct-item" href="login.html">Log in</a>
+        <a class="acct-item" href="register.html">Register</a>
+      </div>
+      <button type="button" id="googleBtn" class="btn-outline btn-wide">
+  <img alt="" src="google.svg" style="width:18px;height:18px;vertical-align:-3px;margin-right:8px"> Continue with Google
+</button>
+<script>
+  document.getElementById('googleBtn')?.addEventListener('click', () => {
+    // point to your backend OAuth start route
+    location.href = (location.origin.includes(':8000') ? location.origin : 'http://127.0.0.1:8000') + '/auth/google/start';
+  });
+</script>
+
+    
+
+    </div>
+  </div>
+
+  <main class="page">
+    <section class="center">
+      <form id="regForm" class="auth-card" autocomplete="on" novalidate>
+        <h2 class="auth-title">Create your account</h2>
+
+        <div class="field">
+          <label>Email</label>
+          <input id="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder="e.g. you@example.com" required />
+        </div>
+
+        <div class="field">
+          <label>Password (min 6)</label>
+          <input id="password" type="password" minlength="6"
+                 autocomplete="new-password" placeholder="••••••••" required />
+        </div>
+
+        <button id="regBtn" class="btn-primary btn-wide" type="submit">Register</button>
+        <div class="msg" id="msg"></div>
+        <div class="muted">Already have an account? <a href="login.html">Login</a></div>
+        <div class="hint">We’ll email you a verification link to confirm your address.</div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const API = location.origin.includes(':8000') ? location.origin : 'http://127.0.0.1:8000';
+    const form = document.getElementById('regForm');
+    const msg  = document.getElementById('msg');
+    const btn  = document.getElementById('regBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pw    = document.getElementById('password').value;
+
+      if (!email) { msg.textContent = 'Please enter an email.'; return; }
+      if (!pw || pw.length < 6) { msg.textContent = 'Password must be at least 6 characters.'; return; }
+
+      btn.disabled = true;
+      msg.textContent = 'Creating account…';
+      try {
+        const res = await fetch(API + '/auth/register', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          credentials: 'include',
+          body: JSON.stringify({ email, password: pw })
+        });
+
+        const text = await res.text();
+        let data; try { data = JSON.parse(text); } catch {}
+        if (!res.ok) {
+          if (res.status === 409) {
+            msg.innerHTML = 'That email is already registered. <a href="login.html">Log in</a>?';
+            return;
+          }
+          throw new Error((data && (data.error || data.detail)) || ('HTTP ' + res.status));
+        }
+
+        msg.textContent = 'Success! Check your email for a verification link…';
+        setTimeout(() => { location.href = 'login.html?just_registered=1'; }, 900);
+      } catch (err) {
+        console.error('[register] error', err);
+        msg.textContent = err.message || 'Failed to register.';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+  
+  <script src="/web/js/app.js?v=2" defer></script>
+<script src="/web/js/auth-gate.js?v=1" defer></script>
+
+</body>
+</html>
